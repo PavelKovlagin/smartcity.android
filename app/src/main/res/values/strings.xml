@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">SmartCity</string>
     <string name="title_activity_maps">Map</string>
+    <string name="adressServer">192.168.43.135:8000</string>
+    <string name="linkSelectEventsFromServer">/api/events</string>
+    <string name="linkSelectEventFromServer">/api/event</string>
 </resources>

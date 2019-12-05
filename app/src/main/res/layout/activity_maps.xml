@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Menu">
+    tools:context=".acticity.ActMaps">
 
     <fragment
         android:id="@+id/map"
@@ -12,17 +12,19 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_weight="0"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".MapsActivity" />
+        tools:context=".acticity.ActMaps" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@color/common_google_signin_btn_text_light_default"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,54 +38,40 @@
 
             <ImageButton
                 android:id="@+id/iButtonAddEvent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:src="@mipmap/addevent_icon_foreground" />
+                android:background="#00FF0000"
+                android:src="@mipmap/ic_addevent_foreground" />
 
             <ImageButton
                 android:id="@+id/iButtonUser"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:src="@mipmap/user_icon_foreground" />
+                android:background="#00866363"
+                android:src="@mipmap/ic_profile_foreground" />
 
-            <Button
-                android:id="@+id/buttonMapUpdate"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <ImageButton
+                android:id="@+id/iButtonUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Обновить" />
+                android:background="#00866363"
+                android:src="@mipmap/ic_update_foreground" />
+
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/textStatusGPS"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="StatusGPS:" />
-
-        <TextView
-            android:id="@+id/textLocationGPS"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="LocationGPS" />
-
-        <TextView
-            android:id="@+id/textStatusNet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="StatusNet" />
-
-        <TextView
-            android:id="@+id/textLocationNet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:text="LocationNet" />
-
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
