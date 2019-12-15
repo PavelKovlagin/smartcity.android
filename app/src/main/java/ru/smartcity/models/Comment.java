@@ -2,8 +2,8 @@ package ru.smartcity.models;
 
 public class Comment {
 
-    String email, text, dateTime;
-
-
+    private String email;
+    private String text;
+    private String dateTime;
 
 }

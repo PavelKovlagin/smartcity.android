@@ -14,10 +14,12 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_smartcity_launcher"
         android:label="@string/app_name"
-
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".acticity.ActShowEvent"></activity>
+        <activity android:name=".acticity.ActRegister"></activity>
+        <activity android:name=".acticity.ActUser" />
+        <activity android:name=".acticity.ActLogin" />
+        <activity android:name=".acticity.ActShowEvent" />
         <activity android:name=".acticity.ActAddEvent" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

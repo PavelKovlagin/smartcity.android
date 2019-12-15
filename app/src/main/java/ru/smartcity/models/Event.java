@@ -18,6 +18,15 @@ public class Event {
     private String statusName;
     private int user_id;
     private String email;
+    private int visibilityForUser;
+
+    public void setVisibilityForUser(int visibilityForUser) {
+        this.visibilityForUser = visibilityForUser;
+    }
+
+    public int getVisibilityForUser() {
+        return visibilityForUser;
+    }
 
     public int getEvent_id() {
         return event_id;
@@ -140,6 +149,7 @@ public class Event {
                 + this.status_id + " "
                 + this.statusName + " "
                 + this.user_id + " "
-                + this.email;
+                + this.email + " "
+                + this.visibilityForUser;
     }
 }

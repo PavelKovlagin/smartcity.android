@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">SmartCity</string>
     <string name="title_activity_maps">Map</string>
-    <string name="adressServer">192.168.43.135:8000</string>
-    <string name="linkSelectEventsFromServer">/api/events</string>
-    <string name="linkSelectEventFromServer">/api/event</string>
+    <string name="smartCityAdress">http://192.168.43.135:8000</string>
+    <string name="grant_type">password</string>
+    <string name="client_id">2</string>
+    <string name="client_secret">CwZkfCVdP0rAQVsn8h1QDlNlHlTpVcTtgJ8kxFjU</string>
 </resources>

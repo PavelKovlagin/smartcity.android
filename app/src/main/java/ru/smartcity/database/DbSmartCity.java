@@ -22,7 +22,7 @@ public class DbSmartCity extends SQLiteOpenHelper {
     private String COLUMN_dateChange = "dateChange";
     private String COLUMN_status_id = "status_id";
     private String COLUMN_statusName = "statusName";
-    private String COLUMN_user_id = "user_iduser_id";
+    private String COLUMN_user_id = "user_id";
     private String COLUMN_email = "email";
 
 
@@ -55,8 +55,7 @@ public class DbSmartCity extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    private void insertOrUpdateEventIntoSQLite(SQLiteDatabase db, Event event, boolean insert) {
-        //SQLiteDatabase db = getWritableDatabase();
+    private ContentValues contentValuesEvent(Event event) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_event_id, event.getEvent_id());
         contentValues.put(COLUMN_eventName, event.getEventName());
@@ -69,12 +68,24 @@ public class DbSmartCity extends SQLiteOpenHelper {
         contentValues.put(COLUMN_statusName, event.getStatusName());
         contentValues.put(COLUMN_user_id, event.getUser_id());
         contentValues.put(COLUMN_email, event.getEmail());
-        if (insert) {
-            long rowID = db.insert("events", null, contentValues);
-            Log.i("insertDBevents", "row inserted ID = " + rowID);
-        } else {
-            long rowID = db.update("events", contentValues, "event_id =" + event.getEvent_id(), null);
-            Log.i("updateDBevents", "row update ID = " + rowID);
+        return contentValues;
+    }
+
+    private void RudEventSqlite(SQLiteDatabase db, Event event, String RUD) {
+        ContentValues cv = contentValuesEvent(event);
+        long rowID = 0;
+        switch (RUD) {
+            case "insert":
+                rowID = db.insert("events", null, cv);
+                Log.i("SQLite. insert event", "row inserted ID = " + rowID);
+                break;
+            case "update":
+                rowID = db.update("events", cv, "event_id =" + event.getEvent_id(), null);
+                Log.i("SQLite. update event", "row update ID = " + rowID);
+                break;
+            case "delete":
+                rowID = db.delete("events", COLUMN_event_id + "=" + event.getEvent_id(), null);
+                Log.i("SQLite. delete event", "row deleted ID = " + rowID);
         }
     }
 
@@ -84,15 +95,20 @@ public class DbSmartCity extends SQLiteOpenHelper {
             Cursor cur = db.rawQuery("SELECT * FROM events WHERE " + COLUMN_event_id + " = " + event.getEvent_id(), null);
             cur.moveToFirst();
             if (cur.getCount() > 0) {
-                insertOrUpdateEventIntoSQLite(db, event, false);
+                if (event.getVisibilityForUser() == 0) {
+                    RudEventSqlite(db, event, "delete");
+                } else {
+                    RudEventSqlite(db, event, "update");
+                }
+
             } else {
-                insertOrUpdateEventIntoSQLite(db, event, true);
+                if (event.getVisibilityForUser() == 1) RudEventSqlite(db, event, "insert");
             }
             cur.close();
         }
     }
 
-    public Event selectEvent(Cursor cursor) {
+    private Event selectEvent(Cursor cursor) {
         Event event = new Event();
         event.setEvent_id(cursor.getInt(cursor.getColumnIndex(COLUMN_event_id)));
         event.setEventName(cursor.getString(cursor.getColumnIndex(COLUMN_eventName)));
@@ -105,7 +121,7 @@ public class DbSmartCity extends SQLiteOpenHelper {
         event.setStatusName(cursor.getString(cursor.getColumnIndex(COLUMN_statusName)));
         event.setUser_id(cursor.getInt(cursor.getColumnIndex(COLUMN_user_id)));
         event.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_email)));
-        Log.i("SQLite.events", event.toString());
+        Log.i("SQLite.selectEvent", event.toString());
         return event;
     }
 
@@ -121,7 +137,7 @@ public class DbSmartCity extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         Cursor cursor = db.rawQuery("select * from events", null);
         //Cursor cursor = db.query("event", null, null, null, null, null, null);
-        cursor.moveToFirst();
+
         try {
             while (cursor.moveToNext()) {
                 events.add(selectEvent(cursor));

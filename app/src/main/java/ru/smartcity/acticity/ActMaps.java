@@ -1,10 +1,10 @@
 package ru.smartcity.acticity;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,8 +14,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -31,14 +29,19 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.SimpleDateFormat;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import ru.smartcity.api.ISmartCityApi;
 import ru.smartcity.database.DbSmartCity;
 import ru.smartcity.models.Event;
-import ru.smartcity.helpers.JsonHelper;
+
 import ru.smartcity.R;
 
 public class ActMaps extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener {
@@ -46,17 +49,29 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
     private GoogleMap mMap;
     private LocationManager locationManager;
     private ImageButton iButtonAddEvent, iButtonUser, iButtomUpdate;
-    private String adressServer, linkSelectEventsFroomServer, lastDateUpdate;
     private double latitude = 0, longitude = 0;
     private SupportMapFragment mapFragment;
     private AlertDialog.Builder ad;
     private ProgressBar progressBar;
     private ArrayList<Event> events;
-    private SharedPreferences sp;
+    private SharedPreferences sPref;
+    private ISmartCityApi smartCityApi;
+
+    @SuppressLint("LongLogTag")
+    private boolean loadToken() {
+        sPref = getSharedPreferences("token", MODE_PRIVATE);
+        String access_token = sPref.getString("access_token", "null");
+        Log.i("ActMaps. access_token load", access_token);
+        if (access_token.equals("null")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     private void saveLastDateUpdate() {
-        sp = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor e = sp.edit();
+        sPref = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor e = sPref.edit();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String nowDate = dateFormat.format(new Date());
@@ -66,70 +81,51 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
     }
 
     private String loadLastDateUpdate() {
-        sp = getPreferences(MODE_PRIVATE);
-        String lastDateUpdate = sp.getString("lastDateUpdate", "0000-01-01 00:00:00");
+        sPref = getPreferences(MODE_PRIVATE);
+        String lastDateUpdate = sPref.getString("lastDateUpdate", "0000-01-01 00:00:00");
         Log.i("LoadLastDateUpdate", lastDateUpdate);
         return lastDateUpdate;
     }
 
     private void mapUpdate() {
+        progressBar.setVisibility(ProgressBar.VISIBLE);
 
-        final Handler handler = new Handler() {
+        smartCityApi.getEvents(loadLastDateUpdate()).enqueue(new Callback<ArrayList<Event>>() {
             @Override
-            public void handleMessage(@NonNull Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what) {
-                    case 0:
-                        progressBar.setVisibility(ProgressBar.VISIBLE);
-                        Log.i("Handler", "progressBarVISIBLE");
-                        break;
-                    case 1:
-                        progressBar.setVisibility(ProgressBar.INVISIBLE);
-                        Log.i("Handler", "progressBarINVISIBLE");
-                        break;
-                    case 2:
-                        Toast.makeText(ActMaps.this, "Ошибка загрузки", Toast.LENGTH_SHORT).show();
-                        Log.i("Handler", "BadLoad");
-                        break;
-                    case 3:
-                        mapFragment.getMapAsync(ActMaps.this);
-                        saveLastDateUpdate();
-                        Log.i("Handler", "updateMap");
-                        break;
+            public void onResponse(Call<ArrayList<Event>> call, Response<ArrayList<Event>> response) {
+                events = response.body();
+                for (Event event : events) {
+                    Log.i("ArrayList<Event>", event.toString());
                 }
+                Toast.makeText(ActMaps.this, "evvents.size=" + events.size(), Toast.LENGTH_SHORT).show();
+                DbSmartCity db = new DbSmartCity(ActMaps.this);
+                db.insertOrUpdateEventsFromArrayList(events);
+                saveLastDateUpdate();
+                mapFragment.getMapAsync(ActMaps.this);
+                progressBar.setVisibility(ProgressBar.INVISIBLE);
             }
-        };
 
-        Runnable runnable = new Runnable() {
             @Override
-            public void run() {
-                handler.sendEmptyMessage(0);
-                ArrayList<Event> events = JsonHelper.getEventsFromServer(adressServer, linkSelectEventsFroomServer, loadLastDateUpdate());
-                if (events == null){
-                    handler.sendEmptyMessage(2);
-                } else {
-                    for (Event event : events) {
-                        Log.i("ArrayList", event.toString());
-                    }
-                    DbSmartCity dbSmartCity = new DbSmartCity(ActMaps.this);
-                    dbSmartCity.insertOrUpdateEventsFromArrayList(events);
-                    handler.sendEmptyMessage(3);
-                }
-                handler.sendEmptyMessage(1);
+            public void onFailure(Call<ArrayList<Event>> call, Throwable t) {
+                Toast.makeText(ActMaps.this, "Load false", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(ProgressBar.INVISIBLE);
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        });
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        adressServer = getString(R.string.adressServer);
-        linkSelectEventsFroomServer = getString(R.string.linkSelectEventsFromServer);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(getString(R.string.smartCityAdress))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        smartCityApi = retrofit.create(ISmartCityApi.class);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-         mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         iButtomUpdate = (ImageButton) findViewById(R.id.iButtonUpdate);
@@ -151,11 +147,9 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
 
     private boolean checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return false;
-        }
-        else {
+        } else {
             return true;
         }
     }
@@ -194,16 +188,17 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.clear();
         final DbSmartCity dbSmartCity = new DbSmartCity(this);
         events = dbSmartCity.getEventsArrayList();
 //        Event someEvent = new Event();
 //        someEvent.setLatitude(56.147630);
 //        someEvent.setLongitude(40.392106);
 //        events.add(someEvent);
-        for (Event event:events){
+        for (Event event : events) {
             Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(event.getLongitude(), event.getLatitude())));
-                    marker.setTag(event.getEvent_id());
+                    .position(new LatLng(event.getLatitude(), event.getLongitude())));
+            marker.setTag(event.getEvent_id());
         }
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -216,7 +211,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
                 ad = new AlertDialog.Builder(ActMaps.this);
                 ad.setTitle(event.getEventName());  // заголовок
                 if (event.getEventDescription().length() > 100) {
-                    ad.setMessage(event.getEventDescription().substring(0,100) + "..."); // сообщение
+                    ad.setMessage(event.getEventDescription().substring(0, 100) + "..."); // сообщение
                 } else {
                     ad.setMessage(event.getEventDescription()); // сообщение
                 }
@@ -266,6 +261,18 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
             case R.id.iButtonUpdate:
                 mapUpdate();
                 break;
+            case R.id.iButtonUser:
+                if (loadToken()) {
+                    //Загрузка профиля пользователя
+                    Intent actUser = new Intent(this, ActUser.class);
+                    startActivity(actUser);
+                    //Toast.makeText(this, "Загрузка профиля", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Загрузка формы логина
+                    Intent actLogin = new Intent(this, ActLogin.class);
+                    startActivity(actLogin);
+                }
+            break;
         }
     }
 }
