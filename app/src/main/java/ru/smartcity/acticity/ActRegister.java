@@ -2,8 +2,10 @@ package ru.smartcity.acticity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +37,17 @@ public class ActRegister extends AppCompatActivity implements View.OnClickListen
     private ISmartCityApi smartCityApi;
     private int DIALOG_DATE = 1;
     private int year, month, day;
+    private SharedPreferences sPref;
+    private Intent actUser;
+
+    @SuppressLint("LongLogTag")
+    private void savetoken(String access_token) {
+        sPref = getSharedPreferences("token", MODE_PRIVATE);
+        SharedPreferences.Editor ed = sPref.edit();
+        ed.putString("access_token", access_token);
+        Log.i("ActRegister. access_token save", access_token);
+        ed.commit();
+    }
 
     private void register () {
         progressBar.setVisibility(ProgressBar.VISIBLE);
@@ -51,9 +64,13 @@ public class ActRegister extends AppCompatActivity implements View.OnClickListen
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 if (response.isSuccessful()) {
-                    Log.i("ActRegister. 111", response.body().toString());
+                    String access_token = response.body().getData().get("token");
+                    savetoken(access_token);
+                    finish();
+                    startActivity(actUser);
+                    Log.i("ActRegister. Response", response.body().toString());
                 } else {
-                    Log.e("ActRegister. 111", response.code() + " " + response.errorBody());
+                    Log.e("ActRegister. Response", response.code() + " " + response.errorBody());
                 }
                 progressBar.setVisibility(ProgressBar.INVISIBLE);
             }
@@ -75,10 +92,7 @@ public class ActRegister extends AppCompatActivity implements View.OnClickListen
         year = calendar.get(Calendar.YEAR);
         month = (calendar.get(Calendar.MONTH))+1;
         day = calendar.get(Calendar.DAY_OF_MONTH);
-//        Date date = new Date();
-//        year = date.getYear();
-//        month = date.getMonth();
-//        day = date.getDay();
+        actUser = new Intent(this, ActUser.class);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(getString(R.string.smartCityAdress))

@@ -11,6 +11,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+import ru.smartcity.models.Comment;
 import ru.smartcity.models.Event;
 
 import ru.smartcity.models.ServerResponse;
@@ -37,4 +38,11 @@ public interface ISmartCityApi {
     @FormUrlEncoded
     @POST("/api/addEvent")
     Call<ServerResponse> addEvent(@Header("Authorization") String authorization, @FieldMap Map<String, String> params);
+
+    @GET("api/eventComments")
+    Call <ArrayList<Comment>> getEventComments(@Query("event_id") String event_id);
+
+    @FormUrlEncoded
+    @POST("api/addComment")
+    Call <ServerResponse> sendComment(@Header("Authorization") String authorization, @FieldMap Map<String, String> params);
 }

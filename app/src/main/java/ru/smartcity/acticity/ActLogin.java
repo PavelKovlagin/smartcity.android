@@ -38,6 +38,7 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
     private ISmartCityApi smartCityApi;
     private SharedPreferences sPref;
     private ProgressBar progressBar;
+    private Intent actUser;
 
     @SuppressLint("LongLogTag")
     private void saveToken(String access_token) {
@@ -45,7 +46,6 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
         SharedPreferences.Editor ed = sPref.edit();
         ed.putString("access_token", access_token);
         Log.i("ActLogin. access_token save", access_token);
-        finish();
         ed.commit();
     }
 
@@ -64,6 +64,8 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
                         if (response.isSuccessful()){
                             String access_token = String.valueOf(response.body().get("access_token"));
                             saveToken(access_token);
+                            startActivity(actUser);
+                            finish();
                             Log.i("ActLogin. Response", access_token);
                         } else {
                             Toast.makeText(ActLogin.this, "Неверный логин или пароль", Toast.LENGTH_SHORT).show();
@@ -92,6 +94,7 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
                 .addConverterFactory(GsonConverterFactory .create())
                 .build();
         smartCityApi = retrofit.create(ISmartCityApi.class);
+        actUser = new Intent(this, ActUser.class);
 
         editEmail = (EditText) findViewById(R.id.editEmail);
         editPassword = (EditText) findViewById(R.id.ActLogin_editPassword);
@@ -111,6 +114,7 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
                 break;
             case R.id.ActLogin_buttonActRegister:
                 Intent actRegister = new Intent(this, ActRegister.class);
+                finish();
                 startActivity(actRegister);
         }
 

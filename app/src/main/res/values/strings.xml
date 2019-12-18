@@ -5,4 +5,5 @@
     <string name="grant_type">password</string>
     <string name="client_id">2</string>
     <string name="client_secret">CwZkfCVdP0rAQVsn8h1QDlNlHlTpVcTtgJ8kxFjU</string>
+    <string name="falseServer">Ошибка соединения с сервером</string>
 </resources>

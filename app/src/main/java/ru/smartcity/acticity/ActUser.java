@@ -108,7 +108,7 @@ public class ActUser extends AppCompatActivity implements View.OnClickListener {
         switch (view.getId()) {
             case R.id.buttonLogout:
                 logout();
-                finish();
+                super.finish();
                 break;
         }
     }

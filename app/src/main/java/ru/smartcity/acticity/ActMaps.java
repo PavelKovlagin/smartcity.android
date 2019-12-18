@@ -56,6 +56,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
     private ArrayList<Event> events;
     private SharedPreferences sPref;
     private ISmartCityApi smartCityApi;
+    private String TAG = this.getClass().toString();
 
     @SuppressLint("LongLogTag")
     private boolean loadToken() {
@@ -97,7 +98,7 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
                 for (Event event : events) {
                     Log.i("ArrayList<Event>", event.toString());
                 }
-                Toast.makeText(ActMaps.this, "evvents.size=" + events.size(), Toast.LENGTH_SHORT).show();
+                Log.i(TAG, String.valueOf(events.size()));
                 DbSmartCity db = new DbSmartCity(ActMaps.this);
                 db.insertOrUpdateEventsFromArrayList(events);
                 saveLastDateUpdate();
@@ -245,16 +246,22 @@ public class ActMaps extends FragmentActivity implements OnMapReadyCallback, Vie
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iButtonAddEvent:
-                Intent addEventAct = new Intent(this, ActAddEvent.class);
-                if (!checkPermissions()) {
-                    Toast.makeText(this, "Разрешения геолокации запрещены", Toast.LENGTH_SHORT).show();
+                if (!loadToken()) {
+                    Intent actLogin = new Intent(this, ActLogin.class);
+                    finish();
+                    startActivity(actLogin);
                 } else {
-                    if ((latitude > 0) && (longitude > 0)) {
-                        addEventAct.putExtra("latitude", latitude);
-                        addEventAct.putExtra("longitude", longitude);
-                        startActivity(addEventAct);
+                    if (!checkPermissions()) {
+                        Toast.makeText(this, "Разрешения геолокации запрещены", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(this, "Координаты GPS не должны быть равны нулю", Toast.LENGTH_SHORT).show();
+                        if ((latitude > 0) && (longitude > 0)) {
+                            Intent addEventAct = new Intent(this, ActAddEvent.class);
+                            addEventAct.putExtra("latitude", latitude);
+                            addEventAct.putExtra("longitude", longitude);
+                            startActivity(addEventAct);
+                        } else {
+                            Toast.makeText(this, "Координаты GPS не должны быть равны нулю", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
                 break;

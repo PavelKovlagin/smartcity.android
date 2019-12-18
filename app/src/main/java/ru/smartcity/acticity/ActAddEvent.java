@@ -52,6 +52,7 @@ public class ActAddEvent extends AppCompatActivity implements View.OnClickListen
             @Override
             public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
                 if (response.isSuccessful()) {
+                    finish();
                     Log.i("ActAddEvent. Response", response.body().toString());
                 } else {
                     Log.i("ActAddEvent. Response", response.code() + " " +response.errorBody());
