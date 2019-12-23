@@ -13,12 +13,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.gson.JsonObject;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -26,15 +21,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 import ru.smartcity.R;
 import ru.smartcity.api.ISmartCityApi;
-import ru.smartcity.models.Event;
 
 public class ActLogin extends AppCompatActivity implements View.OnClickListener {
 
     private EditText editEmail, editPassword;
-    private Button buttonAuth, buttonActRegister;
+    private Button buttonLogin, buttonActRegister;
     private ISmartCityApi smartCityApi;
     private SharedPreferences sPref;
     private ProgressBar progressBar;
@@ -50,6 +43,7 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
     }
 
     private void getToken() {
+        buttonLogin.setEnabled(false);
         progressBar.setVisibility(ProgressBar.VISIBLE);
         Map<String, String> params = new HashMap<String, String>();
         params.put("username", editEmail.getText().toString());
@@ -73,6 +67,7 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
                                     + String.valueOf(response.errorBody())));
                         }
                         progressBar.setVisibility(ProgressBar.INVISIBLE);
+                        buttonLogin.setEnabled(true);
                     }
 
                     @Override
@@ -80,6 +75,7 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
                         Toast.makeText(ActLogin.this, "Ошибка соединения с сервером", Toast.LENGTH_SHORT).show();
                         Log.e("ActLogin. Response", t.toString());
                         progressBar.setVisibility(ProgressBar.INVISIBLE);
+                        buttonLogin.setEnabled(true);
                     }
                 });
     }
@@ -98,8 +94,8 @@ public class ActLogin extends AppCompatActivity implements View.OnClickListener 
 
         editEmail = (EditText) findViewById(R.id.editEmail);
         editPassword = (EditText) findViewById(R.id.ActLogin_editPassword);
-        buttonAuth = (Button) findViewById(R.id.buttonAuth);
-        buttonAuth.setOnClickListener(this);
+        buttonLogin = (Button) findViewById(R.id.buttonAuth);
+        buttonLogin.setOnClickListener(this);
         buttonActRegister = (Button) findViewById(R.id.ActLogin_buttonActRegister);
         buttonActRegister.setOnClickListener(this);
 

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -165,10 +166,15 @@ public class ActShowEvent extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ActShowEvent_buttonSendComment:
-                sendComment(editComment.getText().toString());
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(buttonSendComment.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                editComment.setText("");
+                if (loadToken().equals("null")) {
+                    Intent actLogin = new Intent(this, ActLogin.class);
+                    startActivity(actLogin);
+                } else {
+                    sendComment(editComment.getText().toString());
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(buttonSendComment.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    editComment.setText("");
+                }
                 break;
         }
     }

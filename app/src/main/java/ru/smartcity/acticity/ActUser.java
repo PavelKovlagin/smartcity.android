@@ -3,14 +3,21 @@ package ru.smartcity.acticity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,8 +34,10 @@ public class ActUser extends AppCompatActivity implements View.OnClickListener {
     private SharedPreferences sPref;
     private User user;
     private EditText editName, editSurname, editSubname, editDate, editEmail;
-    private Button buttonLogout;
+    private Button buttonLogout, buttonChangeDate;
     private ProgressBar progressBar;
+    private int DIALOG_DATE = 1;
+    private int year, month, day;
 
     @SuppressLint("LongLogTag")
     private String loadToken() {
@@ -58,6 +67,16 @@ public class ActUser extends AppCompatActivity implements View.OnClickListener {
                             editName.setText(user.getName());
                             editSubname.setText(user.getSubname());
                             editDate.setText(user.getDate());
+                            buttonChangeDate.setEnabled(true);
+                            try {
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(user.getDate()));
+                                year = calendar.get(Calendar.YEAR);
+                                month = calendar.get(Calendar.MONTH);
+                                day = calendar.get(Calendar.DAY_OF_MONTH);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                             Log.i("ActUser. 111", response.body().toString());
                         } else {
                             Log.i("ActUser. 111", response.code() + " "
@@ -100,8 +119,28 @@ public class ActUser extends AppCompatActivity implements View.OnClickListener {
         editDate = (EditText) findViewById(R.id.editDate);
         buttonLogout = (Button) findViewById(R.id.buttonLogout);
         buttonLogout.setOnClickListener(this);
+        buttonChangeDate = (Button) findViewById(R.id.ActUser_buttonDateChange);
+        buttonChangeDate.setOnClickListener(this);
         progressBar = (ProgressBar) findViewById(R.id.ActUser_progressBar);
     }
+
+    protected Dialog onCreateDialog(int id) {
+        if (id == DIALOG_DATE) {
+            DatePickerDialog tpd = new DatePickerDialog(this, myCallBack, year, month, day);
+            return tpd;
+        }
+        return super.onCreateDialog(id);
+    }
+
+    DatePickerDialog.OnDateSetListener myCallBack = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker datePicker, int _year, int _month, int _day) {
+            year = _year;
+            month = _month;
+            day = _day;
+            editDate.setText(year+"-"+(month+1)+"-"+day);
+        }
+    };
 
     @Override
     public void onClick(View view) {
@@ -109,6 +148,9 @@ public class ActUser extends AppCompatActivity implements View.OnClickListener {
             case R.id.buttonLogout:
                 logout();
                 super.finish();
+                break;
+            case R.id.ActUser_buttonDateChange:
+                showDialog(DIALOG_DATE);
                 break;
         }
     }

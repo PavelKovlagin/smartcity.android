@@ -4,6 +4,9 @@
     <string name="smartCityAdress">http://192.168.43.135:8000</string>
     <string name="grant_type">password</string>
     <string name="client_id">2</string>
-    <string name="client_secret">CwZkfCVdP0rAQVsn8h1QDlNlHlTpVcTtgJ8kxFjU</string>
+    <string name="client_secret">lWJpUJpEanmWSOu6DX3AvhfgHTM9enM6fgBr10Ff</string>
     <string name="falseServer">Ошибка соединения с сервером</string>
+    <string name="falseRegister">Ошибка регистрации. Возможно данный email уже занят</string>
+    <string name="passwordsDoNotMatch">Пароли не совпадают</string>
+    <string name="wrongEmail">Неправильная электронная почта</string>
 </resources>

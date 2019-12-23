@@ -42,6 +42,7 @@ public class ActAddEvent extends AppCompatActivity implements View.OnClickListen
     }
 
     private void addEvent(String token) {
+        buttonAddEvent.setEnabled(false);
         progressBar.setVisibility(ProgressBar.VISIBLE);
         Map<String, String> params = new HashMap<String, String>();
         params.put("eventName", editEventName.getText().toString());
@@ -58,12 +59,14 @@ public class ActAddEvent extends AppCompatActivity implements View.OnClickListen
                     Log.i("ActAddEvent. Response", response.code() + " " +response.errorBody());
                 }
                 progressBar.setVisibility(ProgressBar.INVISIBLE);
+                buttonAddEvent.setEnabled(true);
             }
 
             @Override
             public void onFailure(Call<ServerResponse> call, Throwable t) {
                 Log.e("ActAddEvent. Response", "false");
                 progressBar.setVisibility(ProgressBar.INVISIBLE);
+                buttonAddEvent.setEnabled(true);
             }
         });
     }

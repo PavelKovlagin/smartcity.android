@@ -38,6 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
+                android:enabled="false"
                 android:inputType="textPersonName"
                 android:text="Email" />
         </TableRow>
@@ -107,15 +108,26 @@
                 android:id="@+id/textDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Дата рождения:" />
 
             <EditText
                 android:id="@+id/editDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:ems="10"
+                android:enabled="false"
                 android:inputType="textPersonName"
                 android:text="0000-01-01" />
+
+            <Button
+                android:id="@+id/ActUser_buttonDateChange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="Изм." />
 
         </TableRow>
     </TableLayout>
